@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: erika-whatsapp-bot
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+    buildFilter:
+      paths:
+      - package.json
+      - package-lock.json
+      - index.js
+    plan: free
