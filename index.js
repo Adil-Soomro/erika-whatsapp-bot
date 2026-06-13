@@ -599,10 +599,10 @@ let qrScanned = false;
 const client = new Client({
   authStrategy: new LocalAuth({ 
     clientId: "erika-bot",
-    dataPath: "./session-data" // Persist session in Render
+    dataPath: "./session-data"
   }),
   puppeteer: {
-    // ✅ FIX: Remove Windows path, let puppeteer find Chrome automatically
+    // ✅ Let Puppeteer use the downloaded Chrome automatically
     headless: true,
     args: [
       "--no-sandbox",
@@ -611,7 +611,7 @@ const client = new Client({
       "--disable-accelerated-2d-canvas",
       "--no-first-run",
       "--no-zygote",
-      "--single-process", // Added for Render stability
+      "--single-process",
       "--disable-gpu"
     ],
   },
