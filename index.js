@@ -597,10 +597,12 @@ app.listen(PORT, "0.0.0.0", () =>
 // ========== WHATSAPP CLIENT ==========
 let qrScanned = false;
 const client = new Client({
-  authStrategy: new LocalAuth({ clientId: "erika-bot" }),
+  authStrategy: new LocalAuth({ 
+    clientId: "erika-bot",
+    dataPath: "./session-data" // Persist session in Render
+  }),
   puppeteer: {
-    executablePath:
-      "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+    // ✅ FIX: Remove Windows path, let puppeteer find Chrome automatically
     headless: true,
     args: [
       "--no-sandbox",
@@ -609,7 +611,8 @@ const client = new Client({
       "--disable-accelerated-2d-canvas",
       "--no-first-run",
       "--no-zygote",
-      "--disable-gpu",
+      "--single-process", // Added for Render stability
+      "--disable-gpu"
     ],
   },
 });
