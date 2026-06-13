@@ -699,9 +699,18 @@ const client = new Client({
       "--disable-accelerated-2d-canvas",
       "--no-first-run",
       "--no-zygote",
-      "--single-process",
-      "--disable-gpu"
+      "--disable-gpu",
+      "--max_old_space_size=256",        // Limits Chrome to 256MB
+      "--memory-pressure-off",            // Reduces memory pressure
+      "--max-semi-space-size=32",         // Optimizes V8 memory
+      "--js-flags=--max-old-space-size=256",
+      "--disable-software-rasterizer",    // Reduces memory
+      "--disable-extensions",             // Reduces memory
+      "--disable-plugins",                // Reduces memory
+      "--disable-font-subpixel-positioning" // Optional: saves a bit more
     ],
+    defaultViewport: null,
+    ignoreDefaultArgs: ['--disable-extensions']
   },
 });
 
