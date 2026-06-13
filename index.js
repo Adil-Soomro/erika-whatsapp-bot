@@ -523,6 +523,7 @@ require("dotenv").config();
 const cron = require("node-cron");
 const { Client, LocalAuth } = require("whatsapp-web.js");
 const qrcode = require("qrcode-terminal");
+const QRCode = require("qrcode");
 const express = require("express");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const fs = require("fs").promises;
@@ -590,12 +591,99 @@ const model = genAI.getGenerativeModel({
 const app = express();
 const PORT = 5000;
 app.get("/", (req, res) => res.send("Erika Amano WhatsApp AI Bot is running!"));
+
+app.get("/qr", async (req, res) => {
+    if (!latestQR) {
+        return res.send(`
+            <h2>🔴 Waiting for QR Code...</h2>
+            <p>Bot is initializing. Refresh in 10 seconds.</p>
+            <meta http-equiv="refresh" content="10">
+        `);
+    }
+    
+    // Generate square QR code as data URL
+    const qrImage = await QRCode.toDataURL(latestQR, {
+        width: 300,
+        margin: 2,
+        color: {
+            dark: '#000000',
+            light: '#ffffff'
+        }
+    });
+    
+    res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Scan QR - Erika Bot</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                    margin: 0;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                }
+                .container {
+                    text-align: center;
+                    background: white;
+                    padding: 30px;
+                    border-radius: 20px;
+                    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+                }
+                img {
+                    max-width: 100%;
+                    height: auto;
+                    border-radius: 10px;
+                }
+                .steps {
+                    text-align: left;
+                    margin-top: 20px;
+                    font-size: 14px;
+                    color: #666;
+                }
+                h2 { color: #333; margin-top: 0; }
+                button {
+                    margin-top: 20px;
+                    padding: 10px 20px;
+                    background: #25D366;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-size: 16px;
+                }
+                button:hover { background: #128C7E; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h2>📱 Scan with WhatsApp</h2>
+                <img src="${qrImage}" alt="QR Code">
+                <div class="steps">
+                    <strong>Steps:</strong><br>
+                    1️⃣ Open WhatsApp on your phone<br>
+                    2️⃣ Go to Settings → Linked Devices<br>
+                    3️⃣ Tap "Link a Device"<br>
+                    4️⃣ Scan this QR code
+                </div>
+                <button onclick="location.reload()">🔄 Refresh QR</button>
+            </div>
+        </body>
+        </html>
+    `);
+});
+
 app.listen(PORT, "0.0.0.0", () =>
   console.log(`🌐 Web Server Online → Port ${PORT}`),
 );
 
 // ========== WHATSAPP CLIENT ==========
 let qrScanned = false;
+let latestQR = null;
 const client = new Client({
   authStrategy: new LocalAuth({ 
     clientId: "erika-bot",
@@ -619,7 +707,9 @@ const client = new Client({
 
 // ========== QR CODE ==========
 client.on("qr", (qr) => {
+  latestQR = qr;  // 👈 Store QR for web view
   console.log("\n📱 Scan this QR code to connect:");
+  console.log("🖼️ OR visit: https://erika-whatsapp-bot.onrender.com/qr");
   qrcode.generate(qr, { small: true });
 });
 
